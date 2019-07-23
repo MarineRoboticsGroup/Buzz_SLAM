@@ -62,19 +62,27 @@ static bool add_separators(multi_robot_separators::ReceiveSeparators::Request &r
 
       ROS_INFO("Add separator, %llu, %llu", robot_symbol_from.key(), robot_symbol_to.key());
       gtsam::BetweenFactor<gtsam::Pose3> new_factor = gtsam::BetweenFactor<gtsam::Pose3>(robot_symbol_from, robot_symbol_to, measurement, noise_model);
+      ROS_INFO("Checkpoint 0");
       buzz_slam::BuzzSLAMSingleton::GetInstance().GetBuzzSLAM<buzz_slam::BuzzSLAMRos>(VM->robot)->AddSeparatorMeasurement(new_factor);
-
+      ROS_INFO("Checkpoint 1");
       if (VM->robot == req.robot_from_id) {
          graph_utils::PoseWithCovariance pose;
+	 ROS_INFO("Checkpoint 2");
          pose_with_covariance_from_msg(req.pose_estimates_to[idx], pose);
-         buzz_slam::BuzzSLAMSingleton::GetInstance().GetBuzzSLAM<buzz_slam::BuzzSLAMRos>(VM->robot)->UpdatePoseEstimateFromNeighbor(req.robot_to_id, req.kf_ids_to[idx], pose);
+        ROS_INFO("Checkpoint 3"); 
+	buzz_slam::BuzzSLAMSingleton::GetInstance().GetBuzzSLAM<buzz_slam::BuzzSLAMRos>(VM->robot)->UpdatePoseEstimateFromNeighbor(req.robot_to_id, req.kf_ids_to[idx], pose);
+	ROS_INFO("Checkpoint 4");
       } else if (VM->robot == req.robot_to_id) {
          graph_utils::PoseWithCovariance pose;
+	 ROS_INFO("Checkpoint 2");
          pose_with_covariance_from_msg(req.pose_estimates_from[idx], pose);
-         buzz_slam::BuzzSLAMSingleton::GetInstance().GetBuzzSLAM<buzz_slam::BuzzSLAMRos>(VM->robot)->UpdatePoseEstimateFromNeighbor(req.robot_from_id, req.kf_ids_from[idx], pose);
-      }
+         ROS_INFO("CHeckpoint 3");
+	buzz_slam::BuzzSLAMSingleton::GetInstance().GetBuzzSLAM<buzz_slam::BuzzSLAMRos>(VM->robot)->UpdatePoseEstimateFromNeighbor(req.robot_from_id, req.kf_ids_from[idx], pose);
+      	ROS_INFO("Checkpoint 4");
+	}
    }
    res.success = true;
+   ROS_INFO("CHeckpoint 5");
    return true;
 }
 

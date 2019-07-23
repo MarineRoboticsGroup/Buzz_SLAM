@@ -1,3 +1,4 @@
+
 #ifndef MESSAGE_HANDLER_UTILS_H
 #define MESSAGE_HANDLER_UTILS_H
 
@@ -54,17 +55,28 @@ void pose_with_covariance_to_msg(const graph_utils::PoseWithCovariance& pose, ge
 
 void pose_with_covariance_from_msg(const geometry_msgs::PoseWithCovariance& msg, graph_utils::PoseWithCovariance &pose)
 {
+    ROS_INFO("Checkpoint 2.0 %f %f %f %f", msg.pose.orientation.w, msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z);
     gtsam::Rot3 rotation(msg.pose.orientation.w, msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z);
+    ROS_INFO("Checkpoint 2.1");
     gtsam::Point3 translation(msg.pose.position.x, msg.pose.position.y, msg.pose.position.z);
-    
+    ROS_INFO("Checkpoint 2.2");
+    std::cout << "rot : " << rotation << " t: " << translation << std::endl;  
+    ROS_INFO("Checkpoint 2.3");
     pose.pose = gtsam::Pose3(rotation, translation);
-
+    ROS_INFO("Checkpoint 2.4"); 
+    std::cout << "Pose" << std::endl;
     pose.covariance_matrix = gtsam::zeros(6,6);
+    ROS_INFO("Checkpoint 2.5");
+    std::cout << "Fill cov" <<std::endl;
     for (int i = 0; i < 6; i++) {
         for (int j = 0; j < 6; j++) {
+	    ROS_INFO("Checkpoint 2.6 %d %d", i, j);
+	    std::cout << "Fill elem "<< i << "," << j << std::endl;
             pose.covariance_matrix(i, j) = msg.covariance[i*6 + j];
         }
     }
+   ROS_INFO("Checkpoint 2.7");
+   std::cout << "End pose from msg" << std::endl;
 }
 
 void set_covariance_matrix(gtsam::Matrix &covariance_matrix, const double& rotation_std, const double& translation_std)
