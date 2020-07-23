@@ -14,6 +14,7 @@ option(ROS_IRL_ROBOT "Build for IRL robot using ROS" ON)
 # Find pkg-config
 #
 find_package(PkgConfig REQUIRED)
+find_package(roscpp REQUIRED)
 
 if(ARGOS_SIMULATION)
 #
@@ -26,7 +27,7 @@ if(ARGOS_FOUND)
   set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ARGOS_PREFIX}/share/argos3/cmake)
   include(ARGoSCheckQTOpenGL)
   # Look for Lua52
-  find_package(Lua52 REQUIRED)
+  find_package(Lua53 REQUIRED)
   include_directories(${LUA_INCLUDE_DIR})
   link_directories(${ARGOS_PREFIX}/lib/argos3/)
 endif(ARGOS_FOUND)
@@ -54,6 +55,7 @@ message("Boost Libraries: ${Boost_LIBRARIES}")
 # Compile buzz slam library for ARGoS
 #
 if(ARGOS_SIMULATION)
+message(STATUS "argos: "${ARGOS_PREFIX})
 set(ARGOS_BUZZ_SOURCES
   slam/utils/buzz_slam_utils.h
   slam/buzz_slam.h
@@ -92,7 +94,6 @@ target_link_libraries(argos3plugin_simulator_buzz_slam
   robot_measurements
   graph_utils
   )
-
 add_compile_options ( -g -rdynamic )
 set_target_properties(argos3plugin_simulator_buzz_slam PROPERTIES LINKER_LANGUAGE CXX)
 
@@ -135,8 +136,14 @@ endif(IRL_ROBOT)
 
 if(ROS_IRL_ROBOT)
 find_package(Buzz REQUIRED)
+find_package(catkin REQUIRED COMPONENTS roscpp)
+find_library(MULTIROBOT_SEPARATORS_LIBRARY multi_robot_separators HINTS /home/victor/Data/Stages/MIT/multi_robot/multi_robot_SLAM_separators/ros_ws/devel/include/)
+message(STATUS ${MULTIROBOT_SEPARATORS_LIBRARY})
 include_directories(${CMAKE_SOURCE_DIR}/src ${BUZZ_C_INCLUDE_DIR})
 include_directories(${catkin_INCLUDE_DIRS})
+set(MULTIROBOT_HEADERS ${CMAKE_SOURCE_DIR}/../../../../../multi_robot_SLAM_separators/ros_ws/devel/include)
+include_directories(${MULTIROBOT_HEADERS})
+message(STATUS ${MULTIROBOT_HEADERS})
 add_executable(generic_robot_buzz_slam_node
   slam/utils/buzz_slam_utils.h
   slam/buzz_slam.h
@@ -149,7 +156,8 @@ add_executable(generic_robot_buzz_slam_node
   generic_robot/utils/buzz_utils.h
   generic_robot/message_handler_utils/message_handler_utils.h
   generic_robot/buzz_generic_robot_slam_ros.cpp)
-find_library(MULTIROBOT_SEPARATORS_LIBRARY multi_robot_separators HINTS /root/multi_robot_SLAM_separators/ros_ws/devel/lib)
+# target_include_directories(generic_robot_buzz_slam_node PRIVATE ${MULTIROBOT_SEPARATORS_LIBRARY})
+# target_include_directories(generic_robot_buzz_slam_node PRIVATE ${MULTIROBOT_HEADERS})
 target_link_libraries(generic_robot_buzz_slam_node 
   buzz
   buzzdbg
