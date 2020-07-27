@@ -1,7 +1,7 @@
 #
 # Set minimum required version
 #
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.8.12)
 
 #
 # Options
@@ -33,7 +33,6 @@ if(ARGOS_FOUND)
 endif(ARGOS_FOUND)
 endif(ARGOS_SIMULATION)
 
-#
 # Find dependancies
 #
 # Find GTSAM
@@ -51,7 +50,6 @@ include_directories(${Boost_INCLUDE_DIRS})
 link_libraries(${Boost_LIBRARIES})
 message("Boost Libraries: ${Boost_LIBRARIES}")
 
-#
 # Compile buzz slam library for ARGoS
 #
 if(ARGOS_SIMULATION)
@@ -135,45 +133,55 @@ install(TARGETS generic_robot_buzz_slam RUNTIME DESTINATION bin)
 endif(IRL_ROBOT)
 
 if(ROS_IRL_ROBOT)
-  find_package(Buzz REQUIRED)
-  find_package(catkin REQUIRED COMPONENTS roscpp)
-  find_library(MULTIROBOT_SEPARATORS_LIBRARY multi_robot_separators PATHS "~/multi_robot_SLAM_separators/ros_ws/devel/lib/")
+find_package(Buzz REQUIRED)
+find_package(catkin REQUIRED COMPONENTS roscpp)
+find_library(MULTIROBOT_SEPARATORS_LIBRARY multi_robot_separators HINTS "~/multi_robot_SLAM_separators/ros_ws/devel/lib/")
 
-  set(MULTIROBOT_HEADERS "~/multi_robot_SLAM_separators/ros_ws/devel/include/")
+set(MULTIROBOT_HEADERS "~/multi_robot_SLAM_separators/ros_ws/devel/include")
 
-  add_executable(generic_robot_buzz_slam_node
-    slam/utils/buzz_slam_utils.h
-    slam/buzz_slam.h
-    slam/buzz_slam.cpp
-    slam/buzz_slam_singleton.h
-    slam/buzz_slam_closures.cpp
-    slam/specialized/ros/buzz_slam_ros_closures.cpp
-    slam/specialized/ros/buzz_slam_ros.cpp
-    slam/specialized/ros/buzz_slam_ros.h
-    generic_robot/utils/buzz_utils.h
-    generic_robot/message_handler_utils/message_handler_utils.h
-    generic_robot/buzz_generic_robot_slam_ros.cpp
-    )
+add_executable(generic_robot_buzz_slam_node
+  slam/utils/buzz_slam_utils.h
+  slam/buzz_slam.h
+  slam/buzz_slam.cpp
+  slam/buzz_slam_singleton.h
+  slam/buzz_slam_closures.cpp
+  slam/specialized/ros/buzz_slam_ros_closures.cpp
+  slam/specialized/ros/buzz_slam_ros.cpp
+  slam/specialized/ros/buzz_slam_ros.h
+  generic_robot/utils/buzz_utils.h
+  generic_robot/message_handler_utils/message_handler_utils.h
+  generic_robot/buzz_generic_robot_slam_ros.cpp
+  )
 
-  target_include_directories(generic_robot_buzz_slam_node PRIVATE ${CMAKE_SOURCE_DIR}/src ${BUZZ_C_INCLUDE_DIR})
-  target_include_directories(generic_robot_buzz_slam_node PRIVATE ${catkin_INCLUDE_DIRS})
-  target_include_directories(generic_robot_buzz_slam_node PRIVATE ${MULTIROBOT_HEADERS})
+target_include_directories(generic_robot_buzz_slam_node
+  PUBLIC
+  ${CMAKE_SOURCE_DIR}/src
+  ${BUZZ_C_INCLUDE_DIR}
+  ${catkin_INCLUDE_DIRS}
+  ${MULTIROBOT_HEADERS}
+  )
 
-  target_link_libraries(generic_robot_buzz_slam_node 
-    buzz
-    buzzdbg
-    gtsam
-    distributed_mapper
-    distributed_pcm
-    global_map_solver
-    fast_max-clique_finder
-    pairwise_consistency
-    robot_measurements
-    graph_utils
-    -lpthread
-    ${catkin_LIBRARIES}
-    ${MULTIROBOT_SEPARATORS_LIBRARY}
-    )
+# target_include_directories(${catkin_INCLUDE_DIRS})
+# target_include_directories(${MULTIROBOT_HEADERS})
+# target_include_directories(generic_robot_buzz_slam_node PRIVATE ${MULTIROBOT_SEPARATORS_LIBRARY})
+# target_include_directories(generic_robot_buzz_slam_node PRIVATE ${MULTIROBOT_HEADERS})
 
-  install(TARGETS generic_robot_buzz_slam_node RUNTIME DESTINATION bin)
+target_link_libraries(generic_robot_buzz_slam_node 
+  buzz
+  buzzdbg
+  gtsam
+  distributed_mapper
+  distributed_pcm
+  global_map_solver
+  fast_max-clique_finder
+  pairwise_consistency
+  robot_measurements
+  graph_utils
+  -lpthread
+  ${catkin_LIBRARIES}
+  ${MULTIROBOT_SEPARATORS_LIBRARY}
+  )
+
+
+install(TARGETS generic_robot_buzz_slam_node RUNTIME DESTINATION bin)
 endif(ROS_IRL_ROBOT)
